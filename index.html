@@ -1,10 +1,12 @@
 <!DOCTYPE html>
 <html lang="en">
+<!-- Previous head and style sections remain exactly the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>MedArchive</title>
     <style>
+        /* All previous styles remain exactly the same */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -144,6 +146,28 @@
             font-size: 0.9em;
             color: #666;
         }
+
+        .category-buttons {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .category-button {
+            background: #e3f2fd;
+            border: 2px solid #2196f3;
+            color: #0288d1;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .category-button:hover {
+            background: #2196f3;
+            color: white;
+        }
     </style>
 </head>
 <body>
@@ -174,10 +198,17 @@
 
         <div class="search-section">
             <h2>Search Medical Information</h2>
+            
+            <div class="category-buttons">
+                <button class="category-button" onclick="searchCategory('common conditions')">Common Conditions</button>
+                <button class="category-button" onclick="searchCategory('symptoms')">Symptoms</button>
+                <button class="category-button" onclick="searchCategory('treatments')">Treatments</button>
+            </div>
+
             <input type="text" id="symptomSearch" 
-                   placeholder="Enter symptoms or conditions (e.g., runny nose, cough)"
-                   onkeypress="if(event.key === 'Enter') searchMedline()">
-            <button onclick="searchMedline()">Search</button>
+                   placeholder="Enter medical condition, symptom, or treatment"
+                   onkeypress="if(event.key === 'Enter') searchOpenFDA()">
+            <button onclick="searchOpenFDA()">Search</button>
         </div>
 
         <div id="loading" style="display: none;">
@@ -187,12 +218,12 @@
         <div id="results"></div>
 
         <div class="attribution">
-            <p>Medical information provided by the U.S. National Library of Medicine</p>
+            <p>Medical information provided by OpenFDA and other reliable medical sources</p>
         </div>
     </div>
 
     <script>
-        async function searchMedline() {
+        async function searchOpenFDA() {
             const searchTerm = document.getElementById('symptomSearch').value;
             const resultsDiv = document.getElementById('results');
             const loadingDiv = document.getElementById('loading');
@@ -206,35 +237,29 @@
             resultsDiv.innerHTML = '';
 
             try {
-                // Updated URL format for better results
-                const url = `https://wsearch.nlm.nih.gov/ws/query?db=healthTopics&term=${encodeURIComponent(searchTerm)}`;
-
+                const url = `https://api.fda.gov/drug/label.json?search=description:${encodeURIComponent(searchTerm)}&limit=5`;
                 const response = await fetch(url);
-                const text = await response.text();
-                
-                // Parse the XML response
-                const parser = new DOMParser();
-                const xmlDoc = parser.parseFromString(text, "text/xml");
-                const documents = xmlDoc.getElementsByTagName('document');
+                const data = await response.json();
 
                 loadingDiv.style.display = 'none';
 
-                if (documents.length > 0) {
+                if (data.results && data.results.length > 0) {
                     let resultsHTML = '<h3>Search Results:</h3>';
                     
-                    for (let doc of documents) {
-                        const title = doc.getElementsByTagName('content')[0]?.getElementsByTagName('title')[0]?.textContent || 'No Title';
-                        const snippet = doc.getElementsByTagName('content')[0]?.getElementsByTagName('snippet')[0]?.textContent || 'No description available';
-                        const url = doc.getElementsByTagName('content')[0]?.getElementsByTagName('url')[0]?.textContent || '#';
-
+                    data.results.forEach(result => {
+                        const purpose = result.purpose || ['Information not available'];
+                        const warnings = result.warnings || ['No specific warnings listed'];
+                        const description = result.description || ['No description available'];
+                        
                         resultsHTML += `
                             <div class="symptom-card">
-                                <h4>${title}</h4>
-                                <p>${snippet}</p>
-                                <a href="${url}" target="_blank" class="read-more">Read More on MedlinePlus</a>
+                                <h4>${result.openfda?.brand_name?.[0] || 'Medical Information'}</h4>
+                                <p><strong>Description:</strong> ${description[0]}</p>
+                                <p><strong>Purpose:</strong> ${purpose[0]}</p>
+                                <p><strong>Important Information:</strong> ${warnings[0]}</p>
                             </div>
                         `;
-                    }
+                    });
 
                     resultsDiv.innerHTML = resultsHTML;
                 } else {
@@ -244,7 +269,8 @@
                             <ul>
                                 <li>Using more general terms</li>
                                 <li>Checking your spelling</li>
-                                <li>Searching for one symptom at a time</li>
+                                <li>Using a different category</li>
+                                <li>Searching for one condition at a time</li>
                             </ul>
                         </div>
                     `;
@@ -254,17 +280,23 @@
                 resultsDiv.innerHTML = `
                     <div class="warning-box">
                         <p>Sorry, there was an error searching the medical database. Please try again later.</p>
-                        <p>Error details: ${error.message}</p>
+                        <p>Try searching for a different term or checking your internet connection.</p>
                     </div>
                 `;
                 console.error('Error:', error);
             }
         }
 
+        function searchCategory(category) {
+            const searchInput = document.getElementById('symptomSearch');
+            searchInput.value = category + ' ';
+            searchInput.focus();
+        }
+
         // Add Enter key support for search
         document.getElementById('symptomSearch').addEventListener('keypress', function(event) {
             if (event.key === 'Enter') {
-                searchMedline();
+                searchOpenFDA();
             }
         });
     </script>
