@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Medical Symptom Information Tool</title>
+    <title>MedArchive</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -22,12 +22,13 @@
         }
 
         .emergency-banner {
-            background-color: #ff5252;
+            background-color: #d32f2f;
             color: white;
             padding: 15px;
             border-radius: 8px;
             margin-bottom: 20px;
             font-weight: bold;
+            text-align: center;
         }
 
         .warning-box {
@@ -72,29 +73,32 @@
 
         #results {
             margin-top: 20px;
-            padding: 15px;
-            border-radius: 8px;
-            background-color: #f5f5f5;
         }
 
         .symptom-card {
             background-color: white;
-            padding: 15px;
-            margin: 10px 0;
+            padding: 20px;
+            margin: 15px 0;
             border-radius: 8px;
             box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+            border-left: 4px solid #2196f3;
         }
 
-        .urgency-high {
-            border-left: 4px solid #f44336;
+        .symptom-card h4 {
+            color: #0288d1;
+            margin-top: 0;
         }
 
-        .urgency-medium {
-            border-left: 4px solid #ff9800;
+        .read-more {
+            display: inline-block;
+            color: #2196f3;
+            text-decoration: none;
+            margin-top: 10px;
+            font-weight: bold;
         }
 
-        .urgency-low {
-            border-left: 4px solid #4caf50;
+        .read-more:hover {
+            text-decoration: underline;
         }
 
         h1 {
@@ -108,16 +112,6 @@
             margin-top: 20px;
         }
 
-        .disclaimer {
-            font-size: 0.9em;
-            color: #666;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            margin-top: 20px;
-        }
-
-        /* Emergency symptoms list */
         .emergency-list {
             background-color: #ffebee;
             padding: 15px;
@@ -125,18 +119,39 @@
             margin-top: 15px;
         }
 
-        .emergency-list li {
+        .emergency-list h3 {
             color: #d32f2f;
+            margin-top: 0;
+        }
+
+        .emergency-list li {
             margin: 8px 0;
+            color: #333;
+        }
+
+        #loading {
+            text-align: center;
+            padding: 20px;
+            color: #666;
+        }
+
+        .attribution {
+            margin-top: 30px;
+            padding: 15px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+            text-align: center;
+            font-size: 0.9em;
+            color: #666;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>Medical Symptom Information Tool</h1>
+        <h1>MedArchive</h1>
         
         <div class="emergency-banner">
-            🚨 If you are experiencing a medical emergency, call emergency services (911) immediately! 🚨
+            If you are experiencing a medical emergency, call emergency services (911) immediately.
         </div>
 
         <div class="warning-box">
@@ -158,95 +173,92 @@
         </div>
 
         <div class="search-section">
-            <h2>Search Symptoms</h2>
-            <input type="text" id="symptomSearch" placeholder="Enter symptoms (e.g., headache, fever)">
-            <button onclick="searchSymptoms()">Search</button>
+            <h2>Search Medical Information</h2>
+            <input type="text" id="symptomSearch" 
+                   placeholder="Enter symptoms or conditions (e.g., runny nose, cough)"
+                   onkeypress="if(event.key === 'Enter') searchMedline()">
+            <button onclick="searchMedline()">Search</button>
+        </div>
+
+        <div id="loading" style="display: none;">
+            <p>Searching medical database...</p>
         </div>
 
         <div id="results"></div>
 
-        <div class="disclaimer">
-            <h3>Additional Important Information:</h3>
-            <ul>
-                <li>This tool does not provide medical advice or diagnosis</li>
-                <li>Information provided is for educational purposes only</li>
-                <li>Symptoms may indicate various conditions</li>
-                <li>Individual symptoms may vary in severity and presentation</li>
-                <li>When in doubt, always consult a healthcare professional</li>
-            </ul>
+        <div class="attribution">
+            <p>Medical information provided by MedlinePlus, U.S. National Library of Medicine</p>
         </div>
     </div>
 
     <script>
-        // Sample symptom database
-        const symptomDatabase = {
-            "headache": {
-                urgency: "medium",
-                description: "Pain or discomfort in the head, scalp, or neck",
-                commonCauses: ["Tension", "Migraine", "Dehydration", "Stress"],
-                seekCareIf: [
-                    "Sudden severe headache",
-                    "Headache with fever",
-                    "Headache after head injury",
-                    "Worst headache of your life"
-                ]
-            },
-            "fever": {
-                urgency: "medium",
-                description: "Body temperature above normal (98.6°F/37°C)",
-                commonCauses: ["Infection", "Inflammation", "Heat-related illness"],
-                seekCareIf: [
-                    "Temperature above 103°F (39.4°C)",
-                    "Fever lasting more than 3 days",
-                    "Fever with severe pain",
-                    "Fever with difficulty breathing"
-                ]
-            },
-            // Add more symptoms as needed
-        };
-
-        function searchSymptoms() {
-            const searchTerm = document.getElementById('symptomSearch').value.toLowerCase();
+        async function searchMedline() {
+            const searchTerm = document.getElementById('symptomSearch').value;
             const resultsDiv = document.getElementById('results');
-            resultsDiv.innerHTML = '';
-
-            if (searchTerm === '') {
-                resultsDiv.innerHTML = '<p>Please enter a symptom to search.</p>';
+            const loadingDiv = document.getElementById('loading');
+            
+            if (!searchTerm) {
+                resultsDiv.innerHTML = '<p>Please enter a search term</p>';
                 return;
             }
 
-            let found = false;
-            for (const [symptom, info] of Object.entries(symptomDatabase)) {
-                if (symptom.includes(searchTerm)) {
-                    found = true;
-                    resultsDiv.innerHTML += `
-                        <div class="symptom-card urgency-${info.urgency}">
-                            <h3>${symptom.charAt(0).toUpperCase() + symptom.slice(1)}</h3>
-                            <p><strong>Description:</strong> ${info.description}</p>
-                            <p><strong>Common Causes:</strong> ${info.commonCauses.join(", ")}</p>
-                            <div class="warning-box">
-                                <strong>Seek Medical Care if:</strong>
-                                <ul>
-                                    ${info.seekCareIf.map(condition => `<li>${condition}</li>`).join("")}
-                                </ul>
+            loadingDiv.style.display = 'block';
+            resultsDiv.innerHTML = '';
+
+            try {
+                const url = `https://connect.medlineplus.gov/service?mainSearchCriteria.v.c=` + 
+                           encodeURIComponent(searchTerm) +
+                           `&knowledgeResponseType=application/json`;
+
+                const response = await fetch(url);
+                const data = await response.json();
+
+                loadingDiv.style.display = 'none';
+
+                if (data && data.feed && data.feed.entry) {
+                    let resultsHTML = '<h3>Search Results:</h3>';
+                    
+                    data.feed.entry.forEach(entry => {
+                        resultsHTML += `
+                            <div class="symptom-card">
+                                <h4>${entry.title.$t}</h4>
+                                <p>${entry.summary.$t}</p>
+                                <a href="${entry.link[0].href}" target="_blank" 
+                                   class="read-more">Read More on MedlinePlus</a>
                             </div>
+                        `;
+                    });
+
+                    resultsDiv.innerHTML = resultsHTML;
+                } else {
+                    resultsDiv.innerHTML = `
+                        <div class="warning-box">
+                            <p>No results found for "${searchTerm}". Try:</p>
+                            <ul>
+                                <li>Using more general terms</li>
+                                <li>Checking your spelling</li>
+                                <li>Searching for one symptom at a time</li>
+                            </ul>
                         </div>
                     `;
                 }
-            }
-
-            if (!found) {
+            } catch (error) {
+                loadingDiv.style.display = 'none';
                 resultsDiv.innerHTML = `
-                    <p>No exact matches found for "${searchTerm}". Please:</p>
-                    <ul>
-                        <li>Check your spelling</li>
-                        <li>Try using more general terms</li>
-                        <li>Search for one symptom at a time</li>
-                    </ul>
-                    <p class="warning-box">If you're concerned about your symptoms, please consult a healthcare provider.</p>
+                    <div class="warning-box">
+                        <p>Sorry, there was an error searching the medical database. Please try again later.</p>
+                    </div>
                 `;
+                console.error('Error:', error);
             }
         }
+
+        // Add Enter key support for search
+        document.getElementById('symptomSearch').addEventListener('keypress', function(event) {
+            if (event.key === 'Enter') {
+                searchMedline();
+            }
+        });
     </script>
 </body>
 </html>
