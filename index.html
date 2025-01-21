@@ -187,7 +187,7 @@
         <div id="results"></div>
 
         <div class="attribution">
-            <p>Medical information provided by MedlinePlus, U.S. National Library of Medicine</p>
+            <p>Medical information provided by the U.S. National Library of Medicine</p>
         </div>
     </div>
 
@@ -206,28 +206,35 @@
             resultsDiv.innerHTML = '';
 
             try {
-                const url = `https://connect.medlineplus.gov/service?mainSearchCriteria.v.c=` + 
-                           encodeURIComponent(searchTerm) +
-                           `&knowledgeResponseType=application/json`;
+                // Updated URL format for better results
+                const url = `https://wsearch.nlm.nih.gov/ws/query?db=healthTopics&term=${encodeURIComponent(searchTerm)}`;
 
                 const response = await fetch(url);
-                const data = await response.json();
+                const text = await response.text();
+                
+                // Parse the XML response
+                const parser = new DOMParser();
+                const xmlDoc = parser.parseFromString(text, "text/xml");
+                const documents = xmlDoc.getElementsByTagName('document');
 
                 loadingDiv.style.display = 'none';
 
-                if (data && data.feed && data.feed.entry) {
+                if (documents.length > 0) {
                     let resultsHTML = '<h3>Search Results:</h3>';
                     
-                    data.feed.entry.forEach(entry => {
+                    for (let doc of documents) {
+                        const title = doc.getElementsByTagName('content')[0]?.getElementsByTagName('title')[0]?.textContent || 'No Title';
+                        const snippet = doc.getElementsByTagName('content')[0]?.getElementsByTagName('snippet')[0]?.textContent || 'No description available';
+                        const url = doc.getElementsByTagName('content')[0]?.getElementsByTagName('url')[0]?.textContent || '#';
+
                         resultsHTML += `
                             <div class="symptom-card">
-                                <h4>${entry.title.$t}</h4>
-                                <p>${entry.summary.$t}</p>
-                                <a href="${entry.link[0].href}" target="_blank" 
-                                   class="read-more">Read More on MedlinePlus</a>
+                                <h4>${title}</h4>
+                                <p>${snippet}</p>
+                                <a href="${url}" target="_blank" class="read-more">Read More on MedlinePlus</a>
                             </div>
                         `;
-                    });
+                    }
 
                     resultsDiv.innerHTML = resultsHTML;
                 } else {
@@ -247,6 +254,7 @@
                 resultsDiv.innerHTML = `
                     <div class="warning-box">
                         <p>Sorry, there was an error searching the medical database. Please try again later.</p>
+                        <p>Error details: ${error.message}</p>
                     </div>
                 `;
                 console.error('Error:', error);
