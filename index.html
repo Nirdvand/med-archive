@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
-<!-- Previous head and style sections remain exactly the same -->
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MedArchive</title>
+    <title>MedArchive - Symptom Checker</title>
     <style>
-        /* All previous styles remain exactly the same */
+        /* Previous styles remain */
         body {
             font-family: Arial, sans-serif;
             max-width: 800px;
@@ -33,32 +32,71 @@
             text-align: center;
         }
 
-        .warning-box {
-            background-color: #fff3e0;
-            border-left: 4px solid #ff9800;
-            padding: 15px;
+        /* New styles for symptom categories */
+        .symptom-categories {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
             margin: 20px 0;
-            border-radius: 4px;
         }
 
-        .search-section {
+        .category {
             background-color: #e3f2fd;
-            padding: 20px;
+            padding: 15px;
             border-radius: 8px;
-            margin: 20px 0;
-        }
-
-        input[type="text"] {
-            width: 100%;
-            padding: 12px;
-            margin: 8px 0;
-            border: 2px solid #4fc3f7;
-            border-radius: 8px;
+            width: calc(50% - 15px);
             box-sizing: border-box;
-            font-size: 16px;
         }
 
-        button {
+        .category h3 {
+            color: #0288d1;
+            margin-top: 0;
+        }
+
+        .symptom-list {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .symptom-checkbox {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .symptom-checkbox input[type="checkbox"] {
+            width: 18px;
+            height: 18px;
+            cursor: pointer;
+        }
+
+        .symptom-checkbox label {
+            cursor: pointer;
+            flex: 1;
+        }
+
+        .results-section {
+            margin-top: 20px;
+            padding: 20px;
+            background-color: #f5f5f5;
+            border-radius: 8px;
+        }
+
+        .condition-card {
+            background-color: white;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border-left: 4px solid #2196f3;
+        }
+
+        .condition-card h4 {
+            color: #0288d1;
+            margin-top: 0;
+        }
+
+        .analyze-button {
             background: linear-gradient(45deg, #2196f3, #0288d1);
             color: white;
             padding: 12px 25px;
@@ -67,112 +105,60 @@
             cursor: pointer;
             font-size: 16px;
             transition: transform 0.2s;
+            display: block;
+            margin: 20px auto;
+            width: 200px;
         }
 
-        button:hover {
+        .analyze-button:hover {
             transform: translateY(-2px);
         }
 
-        #results {
-            margin-top: 20px;
-        }
-
-        .symptom-card {
-            background-color: white;
-            padding: 20px;
-            margin: 15px 0;
+        .selected-symptoms {
+            background-color: #e3f2fd;
+            padding: 15px;
             border-radius: 8px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-            border-left: 4px solid #2196f3;
+            margin: 20px 0;
         }
 
-        .symptom-card h4 {
+        .selected-symptoms h3 {
             color: #0288d1;
             margin-top: 0;
         }
 
-        .read-more {
+        .selected-symptom-tag {
             display: inline-block;
-            color: #2196f3;
-            text-decoration: none;
-            margin-top: 10px;
-            font-weight: bold;
-        }
-
-        .read-more:hover {
-            text-decoration: underline;
-        }
-
-        h1 {
-            color: #0288d1;
-            text-align: center;
-            margin-bottom: 10px;
-        }
-
-        h2 {
-            color: #0288d1;
-            margin-top: 20px;
-        }
-
-        .emergency-list {
-            background-color: #ffebee;
-            padding: 15px;
-            border-radius: 8px;
-            margin-top: 15px;
-        }
-
-        .emergency-list h3 {
-            color: #d32f2f;
-            margin-top: 0;
-        }
-
-        .emergency-list li {
-            margin: 8px 0;
-            color: #333;
-        }
-
-        #loading {
-            text-align: center;
-            padding: 20px;
-            color: #666;
-        }
-
-        .attribution {
-            margin-top: 30px;
-            padding: 15px;
-            background-color: #f5f5f5;
-            border-radius: 8px;
-            text-align: center;
-            font-size: 0.9em;
-            color: #666;
-        }
-
-        .category-buttons {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 10px;
-            margin: 15px 0;
-        }
-
-        .category-button {
-            background: #e3f2fd;
-            border: 2px solid #2196f3;
-            color: #0288d1;
-            padding: 8px 15px;
-            border-radius: 20px;
-            cursor: pointer;
-            transition: all 0.3s;
-        }
-
-        .category-button:hover {
-            background: #2196f3;
+            background-color: #2196f3;
             color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            margin: 5px;
+            font-size: 14px;
+        }
+
+        .warning-box {
+            background-color: #fff3e0;
+            border-left: 4px solid #ff9800;
+            padding: 15px;
+            margin: 20px 0;
+            border-radius: 4px;
+        }
+
+        .clear-button {
+            background-color: #f44336;
+            color: white;
+            padding: 8px 15px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            margin-left: 10px;
         }
     </style>
 </head>
 <body>
     <div class="container">
-        <h1>MedArchive</h1>
+        <h1>MedArchive - Symptom Checker</h1>
         
         <div class="emergency-banner">
             If you are experiencing a medical emergency, call emergency services (911) immediately.
@@ -184,121 +170,202 @@
             Always seek the advice of your physician or other qualified health provider with any questions about your medical condition.</p>
         </div>
 
-        <div class="emergency-list">
-            <h3>Seek Immediate Medical Attention if you have:</h3>
-            <ul>
-                <li>Difficulty breathing or shortness of breath</li>
-                <li>Chest pain or pressure</li>
-                <li>Severe abdominal pain</li>
-                <li>Sudden severe headache</li>
-                <li>Sudden confusion or difficulty speaking</li>
-                <li>Severe allergic reaction</li>
-            </ul>
-        </div>
-
-        <div class="search-section">
-            <h2>Search Medical Information</h2>
+        <div class="symptom-categories">
+            <div class="category">
+                <h3>General Symptoms</h3>
+                <div class="symptom-list" id="general-symptoms"></div>
+            </div>
             
-            <div class="category-buttons">
-                <button class="category-button" onclick="searchCategory('common conditions')">Common Conditions</button>
-                <button class="category-button" onclick="searchCategory('symptoms')">Symptoms</button>
-                <button class="category-button" onclick="searchCategory('treatments')">Treatments</button>
+            <div class="category">
+                <h3>Head and Chest</h3>
+                <div class="symptom-list" id="head-chest-symptoms"></div>
             </div>
 
-            <input type="text" id="symptomSearch" 
-                   placeholder="Enter medical condition, symptom, or treatment"
-                   onkeypress="if(event.key === 'Enter') searchOpenFDA()">
-            <button onclick="searchOpenFDA()">Search</button>
+            <div class="category">
+                <h3>Digestive Issues</h3>
+                <div class="symptom-list" id="digestive-symptoms"></div>
+            </div>
+
+            <div class="category">
+                <h3>Pain and Discomfort</h3>
+                <div class="symptom-list" id="pain-symptoms"></div>
+            </div>
         </div>
 
-        <div id="loading" style="display: none;">
-            <p>Searching medical database...</p>
+        <div class="selected-symptoms">
+            <h3>Selected Symptoms <button onclick="clearAll()" class="clear-button">Clear All</button></h3>
+            <div id="selected-symptoms-list"></div>
         </div>
 
-        <div id="results"></div>
+        <button class="analyze-button" onclick="analyzeSymptoms()">Analyze Symptoms</button>
+
+        <div id="results" class="results-section" style="display: none;"></div>
 
         <div class="attribution">
-            <p>Medical information provided by OpenFDA and other reliable medical sources</p>
+            <p>Information is for educational purposes only. Always consult healthcare professionals for medical advice.</p>
         </div>
     </div>
 
     <script>
-        async function searchOpenFDA() {
-            const searchTerm = document.getElementById('symptomSearch').value;
-            const resultsDiv = document.getElementById('results');
-            const loadingDiv = document.getElementById('loading');
+        // Symptom database
+        const symptoms = {
+            general: [
+                "Fever", "Fatigue", "Weakness", "Chills", "Night sweats",
+                "Loss of appetite", "Weight loss", "Dizziness"
+            ],
+            headChest: [
+                "Headache", "Runny nose", "Cough", "Sore throat", "Difficulty breathing",
+                "Chest pain", "Nasal congestion", "Sneezing"
+            ],
+            digestive: [
+                "Nausea", "Vomiting", "Diarrhea", "Constipation", "Stomach pain",
+                "Bloating", "Heartburn", "Loss of appetite"
+            ],
+            pain: [
+                "Muscle aches", "Joint pain", "Back pain", "Neck pain",
+                "Abdominal pain", "Chest pain", "Headache"
+            ]
+        };
+
+        // Conditions database with associated symptoms
+        const conditions = {
+            "Common Cold": {
+                symptoms: ["Runny nose", "Cough", "Sore throat", "Nasal congestion", "Sneezing"],
+                description: "A viral infection of the upper respiratory tract.",
+                severity: "Mild",
+                duration: "7-10 days typically",
+                advice: "Rest, stay hydrated, and consider over-the-counter cold medications."
+            },
+            "Flu (Influenza)": {
+                symptoms: ["Fever", "Fatigue", "Muscle aches", "Headache", "Cough", "Chills"],
+                description: "A viral infection that attacks your respiratory system.",
+                severity: "Moderate",
+                duration: "1-2 weeks typically",
+                advice: "Rest, stay hydrated, and consult healthcare provider if symptoms are severe."
+            },
+            "Gastroenteritis": {
+                symptoms: ["Nausea", "Vomiting", "Diarrhea", "Stomach pain", "Fever"],
+                description: "Inflammation of the digestive system, often called stomach flu.",
+                severity: "Moderate",
+                duration: "1-3 days typically",
+                advice: "Stay hydrated, rest, and follow the BRAT diet (Bananas, Rice, Applesauce, Toast)."
+            }
+            // Add more conditions as needed
+        };
+
+        // Initialize symptom checkboxes
+        function initializeSymptoms() {
+            createCheckboxes('general-symptoms', symptoms.general);
+            createCheckboxes('head-chest-symptoms', symptoms.headChest);
+            createCheckboxes('digestive-symptoms', symptoms.digestive);
+            createCheckboxes('pain-symptoms', symptoms.pain);
+        }
+
+        function createCheckboxes(containerId, symptomList) {
+            const container = document.getElementById(containerId);
+            symptomList.forEach(symptom => {
+                const div = document.createElement('div');
+                div.className = 'symptom-checkbox';
+                div.innerHTML = `
+                    <input type="checkbox" id="${symptom.replace(/\s+/g, '-')}" 
+                           onchange="updateSelectedSymptoms()" value="${symptom}">
+                    <label for="${symptom.replace(/\s+/g, '-')}">${symptom}</label>
+                `;
+                container.appendChild(div);
+            });
+        }
+
+        function updateSelectedSymptoms() {
+            const selectedContainer = document.getElementById('selected-symptoms-list');
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]:checked');
             
-            if (!searchTerm) {
-                resultsDiv.innerHTML = '<p>Please enter a search term</p>';
+            selectedContainer.innerHTML = Array.from(checkboxes)
+                .map(cb => `<span class="selected-symptom-tag">${cb.value}</span>`)
+                .join('');
+        }
+
+        function clearAll() {
+            const checkboxes = document.querySelectorAll('input[type="checkbox"]');
+            checkboxes.forEach(cb => cb.checked = false);
+            updateSelectedSymptoms();
+            document.getElementById('results').style.display = 'none';
+        }
+
+        function analyzeSymptoms() {
+            const selectedSymptoms = Array.from(document.querySelectorAll('input[type="checkbox"]:checked'))
+                .map(cb => cb.value);
+
+            if (selectedSymptoms.length === 0) {
+                alert('Please select at least one symptom');
                 return;
             }
 
-            loadingDiv.style.display = 'block';
-            resultsDiv.innerHTML = '';
+            const results = [];
+            for (const [condition, data] of Object.entries(conditions)) {
+                const matchingSymptoms = data.symptoms.filter(symptom => 
+                    selectedSymptoms.includes(symptom)
+                );
 
-            try {
-                const url = `https://api.fda.gov/drug/label.json?search=description:${encodeURIComponent(searchTerm)}&limit=5`;
-                const response = await fetch(url);
-                const data = await response.json();
-
-                loadingDiv.style.display = 'none';
-
-                if (data.results && data.results.length > 0) {
-                    let resultsHTML = '<h3>Search Results:</h3>';
-                    
-                    data.results.forEach(result => {
-                        const purpose = result.purpose || ['Information not available'];
-                        const warnings = result.warnings || ['No specific warnings listed'];
-                        const description = result.description || ['No description available'];
-                        
-                        resultsHTML += `
-                            <div class="symptom-card">
-                                <h4>${result.openfda?.brand_name?.[0] || 'Medical Information'}</h4>
-                                <p><strong>Description:</strong> ${description[0]}</p>
-                                <p><strong>Purpose:</strong> ${purpose[0]}</p>
-                                <p><strong>Important Information:</strong> ${warnings[0]}</p>
-                            </div>
-                        `;
+                if (matchingSymptoms.length > 0) {
+                    results.push({
+                        condition,
+                        data,
+                        matchCount: matchingSymptoms.length,
+                        matchingSymptoms
                     });
-
-                    resultsDiv.innerHTML = resultsHTML;
-                } else {
-                    resultsDiv.innerHTML = `
-                        <div class="warning-box">
-                            <p>No results found for "${searchTerm}". Try:</p>
-                            <ul>
-                                <li>Using more general terms</li>
-                                <li>Checking your spelling</li>
-                                <li>Using a different category</li>
-                                <li>Searching for one condition at a time</li>
-                            </ul>
-                        </div>
-                    `;
                 }
-            } catch (error) {
-                loadingDiv.style.display = 'none';
+            }
+
+            displayResults(results, selectedSymptoms);
+        }
+
+        function displayResults(results, selectedSymptoms) {
+            const resultsDiv = document.getElementById('results');
+            resultsDiv.style.display = 'block';
+
+            if (results.length === 0) {
                 resultsDiv.innerHTML = `
                     <div class="warning-box">
-                        <p>Sorry, there was an error searching the medical database. Please try again later.</p>
-                        <p>Try searching for a different term or checking your internet connection.</p>
+                        <h3>No Exact Matches Found</h3>
+                        <p>While we couldn't find exact matches for your combination of symptoms, 
+                        please consult a healthcare provider for proper evaluation.</p>
                     </div>
                 `;
-                console.error('Error:', error);
+                return;
             }
+
+            results.sort((a, b) => b.matchCount - a.matchCount);
+
+            let resultsHTML = `
+                <h3>Possible Conditions</h3>
+                <div class="warning-box">
+                    <p>These results are for informational purposes only. 
+                    Consult a healthcare provider for proper diagnosis and treatment.</p>
+                </div>
+            `;
+
+            results.forEach(({condition, data, matchingSymptoms}) => {
+                const matchPercentage = Math.round(
+                    (matchingSymptoms.length / data.symptoms.length) * 100
+                );
+
+                resultsHTML += `
+                    <div class="condition-card">
+                        <h4>${condition}</h4>
+                        <p><strong>Description:</strong> ${data.description}</p>
+                        <p><strong>Matching Symptoms:</strong> ${matchingSymptoms.join(', ')}</p>
+                        <p><strong>Typical Duration:</strong> ${data.duration}</p>
+                        <p><strong>General Advice:</strong> ${data.advice}</p>
+                        <p><strong>Symptom Match:</strong> ${matchPercentage}%</p>
+                    </div>
+                `;
+            });
+
+            resultsDiv.innerHTML = resultsHTML;
         }
 
-        function searchCategory(category) {
-            const searchInput = document.getElementById('symptomSearch');
-            searchInput.value = category + ' ';
-            searchInput.focus();
-        }
-
-        // Add Enter key support for search
-        document.getElementById('symptomSearch').addEventListener('keypress', function(event) {
-            if (event.key === 'Enter') {
-                searchOpenFDA();
-            }
-        });
+        // Initialize on page load
+        window.onload = initializeSymptoms;
     </script>
 </body>
 </html>
